@@ -8,7 +8,7 @@ const KEY = '32824197-fdf9de1b54cd092b4fe49e40b';
 const input = document.querySelector('input[name="searchQuery"]');
 const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
-let gallerySimpleLightbox = new SimpleLightbox('.gallery a');
+let gallerySimpleLightbox = new SimpleLightbox('.photo-card a');
 const btnLoad = document.querySelector('.load-more');
 // btnLoad.hidden = true;
 let page = 1;
@@ -61,8 +61,8 @@ function renderImageList(imagesCard) {
   const markup = imagesCard
     .map(image => {
       return `<div class="photo-card">
-    <a href="${image.largeImageURL}"></a>
-  <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" />
+    <a href="${image.largeImageURL}">
+  <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" /></a>
   <div class="info">
     <p class="info-item">
       <b>Likes</b> <span>${image.likes}</span>
@@ -96,6 +96,6 @@ function onLoad() {
       btnLoad.hidden = true;
     }
     renderImageList(dataOfImage.hits);
-    gallerySimpleLightbox.refresh();
+    
   });
 }
