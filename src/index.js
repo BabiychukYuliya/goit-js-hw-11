@@ -26,76 +26,91 @@ async function fetchQuery(inputValue, page = 1) {
   }
 }
 
-function onSearch(evn) {
+btnLoad.style.display = 'none';
+
+async function onSearch(evn) {
   evn.preventDefault();
-  cleanHtml();
 
   const inputValue = input.value.trim();
-  fetchQuery(inputValue, page)
-    .then(dataOfImage => {
-      if (dataOfImage.totalHits === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else {
-        renderImageList(dataOfImage.hits);
 
-        btnLoad.hidden = false;
-        Notiflix.Notify.success(
-          `Hooray! We found ${dataOfImage.totalHits} images.`
-        );
-        gallerySimpleLightbox.refresh();
-      }
-    })
-    .catch(err => console.log(err));
-}
+  page = 1;
+  if (inputValue === '') {
+    cleanHtml();
+    return;
+  }
 
-form.addEventListener('submit', onSearch);
+  const response = await fetchQuery(inputValue, page);
 
-function cleanHtml() {
-  gallery.innerHTML = '';
-}
-
-function renderImageList(imagesCard) {
-  // console.log(imagesCard);
-  const markup = imagesCard
-    .map(image => {
-      return `<div class="photo-card">
-    <a href="${image.largeImageURL}">
-  <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" /></a>
-  <div class="info">
-    <p class="info-item">
-      <b>Likes</b> <span>${image.likes}</span>
-    </p>
-    <p class="info-item">
-      <b>Views</b> <span>${image.views}</span>
-    </p>
-    <p class="info-item">
-      <b>Comments</b> <span>${image.comments}</span>
-    </p>
-    <p class="info-item">
-      <b>Downloads</b> <span>${image.downloads}</span>
-    </p>
-  </div>
-</div>`;
-    })
-    .join('');
-  gallery.innerHTML = markup;
-}
-
-btnLoad.addEventListener('click', onLoad);
-
-function onLoad() {
-  page += 1;
-  const inputValue = input.value.trim();
-  fetchQuery(inputValue, page).then(dataOfImage => {
-    if (dataOfImage.totalHits < page * per_page) {
-      Notiflix.Notify.warning(
-        "We're sorry, but you've reached the end of search results."
+  try {
+    if (response.totalHits === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
       );
-      btnLoad.hidden = true;
+      gallery.innerHTML = '';
+      btnLoad.style.display = 'none';
+      
+    } else {
+      gallery.innerHTML = '';
+      renderImageList(response.hits);
+      Notiflix.Notify.success(`Hooray! We found ${response.totalHits} images.`);
+      btnLoad.style.display = 'block';
+      gallerySimpleLightbox.refresh();
     }
-    renderImageList(dataOfImage.hits);
-    
-  });
+  } catch {
+    err => console.log(err);
+  }
 }
+
+  form.addEventListener('submit', onSearch);
+
+  function cleanHtml() {
+    gallery.innerHTML = '';
+    page = 1;
+  }
+
+  function renderImageList(imagesCard) {
+    // console.log(imagesCard);
+    const markup = imagesCard
+      .map(image => {
+        return `<div class="photo-card">
+      <a href="${image.largeImageURL}"><img class="photo" src="${image.webformatURL}" alt="${image.tags}" title="${image.tags}" loading="lazy"/></a>
+       <div class="info">
+          <p class="info-item">
+   <b>Likes</b> <span class="info-item-api"> ${image.likes} </span>
+</p>
+           <p class="info-item">
+               <b>Views</b> <span>${image.views}</span>  
+           </p>
+           <p class="info-item">
+               <b>Comments</b> <span>${image.comments}</span>  
+           </p>
+           <p class="info-item">
+               <b>Downloads</b> <span>${image.downloads}</span> 
+           </p>
+       </div>
+   </div>`;
+      })
+      .join('');
+    gallery.insertAdjacentHTML('beforeend', markup);
+  }
+
+  btnLoad.addEventListener('click', onLoad);
+
+  async function onLoad() {
+    page += 1;
+    const inputValue = input.value.trim();
+
+    const response = await fetchQuery(inputValue, page);
+    try {
+      if (response.totalHits < page * per_page) {
+        Notiflix.Notify.warning(
+          "We're sorry, but you've reached the end of search results."
+        );
+        btnLoad.style.display = 'none';
+      }
+      renderImageList(response.hits);
+    } catch {
+      err => console.log(err);
+    }
+  }
+
