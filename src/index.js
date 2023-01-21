@@ -18,7 +18,7 @@ const per_page = 40;
 async function fetchQuery(inputValue, page = 1) {
   try {
     const response = await axios.get(
-      `https://pixabay.com/api/?key=32824197-fdf9de1b54cd092b4fe49e40b&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&${per_page}`
+      `https://pixabay.com/api/?key=32824197-fdf9de1b54cd092b4fe49e40b&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${per_page}`
     );
     return response.data;
   } catch (error) {
